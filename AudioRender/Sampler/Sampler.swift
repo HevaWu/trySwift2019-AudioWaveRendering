@@ -24,7 +24,7 @@ let strategy:DsStrategy = .maxValue
 // MARK: - Accelerate Framework selection
 //
 let useAccelForDs = true
-let useAccelForMerge = false
+let useAccelForMerge = true
 let useAccelForPeakCalc = false
 let useAccelForBuildPoints = false
 
@@ -360,6 +360,8 @@ class Sampler: NSObject {
                     //
                     // Insert Accelerate merge code here
                     //
+                    var avg:Float = 0.5
+                    vDSP_vasm(fcd[0], 1, fcd[1], 1, &avg, sfd, 1, vDSP_Length(frameLength))
                 }
             }
             sampleBuffer.frameLength = frameLength
