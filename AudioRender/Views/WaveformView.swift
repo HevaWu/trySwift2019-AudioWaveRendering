@@ -49,7 +49,7 @@ enum RenderConfig:String {
     case mask = "Mask"              // Outline inserted into path, scaled by transform and masked
 }
 
-let renderConfig:RenderConfig   = .linkLines
+let renderConfig:RenderConfig   = .fill
 let shouldNormalise             = false
 
 class WaveformView: UIView {
@@ -268,7 +268,11 @@ extension WaveformViewLayerDelegate {
             //
             // Add CGAffineTransform code here
             //
-            let tf = CGAffineTransform.identity
+//            let tf = CGAffineTransform.identity
+            var tf = CGAffineTransform.identity
+            let yScale = shouldNormalise ? kWaveformYScale / CGFloat(sb.peak) : kWaveformYScale
+            tf = tf.translatedBy(x: 0.5, y: layer.bounds.height / 2)
+            tf = tf.scaledBy(x: layer.bounds.width / (CGFloat(sb.points.count) / 2), y: (layer.bounds.height / 2) * yScale)
 
             timing(index: index, key: "buildpath", comment: "", stats: timeStats) {
                 path.addLines(between: sb.points, transform: tf)
