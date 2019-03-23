@@ -25,7 +25,7 @@ let strategy:DsStrategy = .maxValue
 //
 let useAccelForDs = true
 let useAccelForMerge = true
-let useAccelForPeakCalc = false
+let useAccelForPeakCalc = true
 let useAccelForBuildPoints = true
 
 //
