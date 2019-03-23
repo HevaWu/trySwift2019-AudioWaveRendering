@@ -26,7 +26,7 @@ let strategy:DsStrategy = .maxValue
 let useAccelForDs = true
 let useAccelForMerge = true
 let useAccelForPeakCalc = false
-let useAccelForBuildPoints = false
+let useAccelForBuildPoints = true
 
 //
 // Multi-reader
@@ -408,6 +408,21 @@ class Sampler: NSObject {
                 //
                 // Insert Accelerate build point array code here
                 //
+                ptArray.withUnsafeMutableBufferPointer { buffer in
+                    guard let bp = buffer.baseAddress else { return }
+                    
+                    let doublesPtr = UnsafeMutableRawPointer(bp).bindMemory(to: Double.self, capacity: Int(sampleBuffer.frameLength) * 2)
+                    var startValue:Double = 0.0
+                    var incrBy:Double = 1.0
+                    
+                    // frameLength * 4 is because CGPoint(xCGFloat, yCGFloat), first half of array has same of CGPoint source data, frameLength * 2 Double, plus the last half, it will be frameLength * 4
+                    // 1000 CGPoint, 2000 CGFloat, Double
+                    vDSP_vrampD(&startValue, &incrBy, doublesPtr, 2, vDSP_Length(sampleBuffer.frameLength))
+                    vDSP_vrampD(&startValue, &incrBy, doublesPtr + (Int(sampleBuffer.frameLength) * 4) - 2, -2, vDSP_Length(sampleBuffer.frameLength))
+                    vDSP_vspdp(fd, 1, doublesPtr + 1, 2, vDSP_Length(sampleBuffer.frameLength))
+                    vDSP_vneg(fd, 1, fd, 1, vDSP_Length(sampleBuffer.frameLength))
+                    vDSP_vspdp(fd, 1, doublesPtr + (Int(sampleBuffer.frameLength) * 4) - 1, -2, vDSP_Length(sampleBuffer.frameLength))
+                }
             }
         }
         sampleBuffer.points = ptArray
